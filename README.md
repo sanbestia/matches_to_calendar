@@ -11,3 +11,4 @@ Not polished! Might crash or raise errors if you don't follow the exact instruct
 - [ ] Restrict input possibilities
 - [ ] Create user interface?
 - [ ] Create webapp to host it?
+- [ ] Implement database keeping module
