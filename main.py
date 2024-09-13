@@ -37,6 +37,8 @@ def main() -> None:
 
     side_id_dict: dict[str, dict[str, str]] = get_ids()
 
+    print(side_id_dict)
+
     calendar_id: str = input("Enter calendar id: ")
 
     refresh_rate: int = int(input("Input minutes between updates:\n"))

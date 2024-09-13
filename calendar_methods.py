@@ -32,14 +32,14 @@ def new_calendar(creds) -> None:
         return created_calendar
 
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        print(f"An error occurred:\n{error}")
 
 
 def update_events(creds, calendar_id, game_list, time_zone):
-    print("Updating calendar...\n")
+    print("* Updating calendar...\n")
     service = build("calendar", "v3", credentials=creds)
 
-    print("Looking up future events...\n")
+    print("Looking up future events...")
     event_list = service.events().list(
         calendarId=calendar_id,
         timeMin=(datetime.now()-timedelta(hours=12)).astimezone().replace(microsecond=0).isoformat()).execute()
@@ -73,7 +73,7 @@ def update_events(creds, calendar_id, game_list, time_zone):
                                                             eventId=event['id'],
                                                             body=event_to_update
                                                             ).execute()
-                    print(f'Event updated: {updated_event.get("summary")}\nLink: {updated_event.get("htmlLink")})')
+                    print(f'Event updated: {updated_event.get("summary")}\nLink: {updated_event.get("htmlLink")}')
                 else:
                     print(f"'{event['summary']}' already up to date!")
 
@@ -99,12 +99,11 @@ def update_events(creds, calendar_id, game_list, time_zone):
                 }
 
                 event = service.events().insert(calendarId=calendar_id, body=event).execute()
-                print(f'Event created: {event.get("summary")}\nLink: {event.get("htmlLink")})')
+                print(f'Event created: {event.get("summary")}\nLink: {event.get("htmlLink")}')
 
             except HttpError as error:
                 print(f"An error occurred: {error}")
-
-        print()
+    print()
 
 
 def main():

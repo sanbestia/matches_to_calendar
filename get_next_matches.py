@@ -9,7 +9,7 @@ import json
 
 
 def get_next_matches(team_id: str, team_name: str, sport: str, time_zone: str) -> list[Match]:
-    print(f"Looking for games featuring {team_name}:")
+    print(f"* Looking for games featuring {team_name}:\n")
 
     headers: dict[str, str] = {
         "X-RapidAPI-Key": "3f3cbf5db7msh03db9b62179412fp12c91bjsnd280512fdf8a",
@@ -18,7 +18,7 @@ def get_next_matches(team_id: str, team_name: str, sport: str, time_zone: str) -
 
     next_games: list[Match] = []
 
-    events: list[Any] = []
+    events: list = []
 
     read_next_page: bool = True
     page: int = 0
@@ -31,19 +31,29 @@ def get_next_matches(team_id: str, team_name: str, sport: str, time_zone: str) -
                f"next/"
                f"{page}")
 
-        request = requests.get(url, headers=headers)
+        try:
+            request = requests.get(url, headers=headers)
+
+        except (TimeoutError, ConnectionError) as e:
+            print("Couldn't communicate with sports API")
+            print(e)
+            return []
 
         if page == 0 and not request.text:
-            print("No upcoming games found")
-            return next_games
+            print("No upcoming games found\n")
+            return []
 
-        request_text = json.loads(request.text)
+        request_dict = json.loads(request.text)
 
-        events += request_text["events"]
+        if "events" not in request_dict:
+            print(f"Request Error: 'events' key not found in\n"
+                  f"{request_dict}")
+            return []
 
-        read_next_page = request_text['hasNextPage']
+        events += request_dict["events"]
+
+        read_next_page = request_dict['hasNextPage']
         page += 1
-
 
     print("Got data:")
     for event in events:
@@ -64,8 +74,8 @@ def get_next_matches(team_id: str, team_name: str, sport: str, time_zone: str) -
 
         print(game, time_zone)
         next_games.append(game)
-        print()
 
+    print()
     return next_games
 
 

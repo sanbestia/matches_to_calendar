@@ -4,6 +4,7 @@
 import os.path
 
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
@@ -15,18 +16,26 @@ def check_calendar_tokens() -> Credentials:
     print("Checking tokens...")
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
+    # created automatically when the authorization flow completes for the first time.
     if os.path.exists(path="token.json"):
         creds = Credentials.from_authorized_user_file(filename="token.json", scopes=SCOPES)
         print("Tokens exist")
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         print("No valid tokens available, creating new ones")
+        refreshed = False
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow: InstalledAppFlow = (InstalledAppFlow.from_client_secrets_file(
+            try:
+                creds.refresh(Request())
+                print("Creds refreshed.")
+                refreshed = True
+            except Exception as e:
+                print(f"Failed to refresh non-valid tokens.\n"
+                      f"{e}\n"
+                      f"Deleting tokens and trying to restart authorization flow...")
+                os.remove("token.json")
+        if not refreshed:
+            flow = (InstalledAppFlow.from_client_secrets_file(
                 client_secrets_file="credentials.json",
                 scopes=SCOPES
             ))
